@@ -13,6 +13,12 @@ https://templatemo.com/tm-532-next-level
     <link rel="stylesheet" href="css/all.min.css" />
     <link rel="stylesheet" href="css/bootstrap.min.css" />
     <link rel="stylesheet" href="css/templatemo-style.css" />
+    <link rel="stylesheet" href="css/dash.css" />
+    <link rel="stylesheet" href="login.css">
+    <link rel="stylesheet" href="css/adm.css">
+    <link rel="stylesheet" href="css/editar_usuario.css">
+    
+
   </head>
   <body>
     <div class="container-fluid">
@@ -41,16 +47,13 @@ https://templatemo.com/tm-532-next-level
                 <ul class="navbar-nav ml-auto mr-0">
                   <li class="nav-item">
                     <div class="tm-nav-link-highlight"></div>
-                    <a class="nav-link" href="index.php">Início</a>
+                    <a class="nav-link" href="config.php">Início</a>
                   </li>
                   <li class="nav-item">
                     <div class="tm-nav-link-highlight"></div>
-                    <a class="nav-link" href="sobre.php">Sobre</a>
+                    <a class="nav-link" href="dashboard.php">Livros</a>
                   </li>
-                  <li class="nav-item">
-                    <div class="tm-nav-link-highlight"></div>
-                    <a class="nav-link" href="config.php">Configurações</a>
-                  </li>
+                 
                   <li class="nav-item">
                     <div class="tm-nav-link-highlight"></div>
                     <a class="nav-link" href="login.php">Sair</a>

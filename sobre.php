@@ -90,19 +90,7 @@
                   </p>
                 </div>
 
-                <div class="col-md-6 tm-home-section-2-left">
-                  <div
-                    class="img-fluid tm-mb-4 tm-small-parallax"
-                    data-parallax="scroll"
-                    data-image-src="img/livros5.jpg"></div>
-
-                    <div
-                    class="img-fluid tm-mb-4 tm-small-parallax"
-                    data-parallax="scroll"
-                    data-image-src="img/livros6.jpg"></div>
-              
-
-                </div>
+             
         
         </div>
       </section>

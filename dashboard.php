@@ -1,4 +1,14 @@
 <?php
+session_start();
+
+// se o usuário não estiver logado, redireciona para login
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+    header('Location: login.php');
+    exit;
+}
+?>
+
+<?php
   include 'cabecalho_painel.php';
   include 'conexao.php'; // arquivo com sua conexão ao banco (ex: mysqli_connect)
 ?>
@@ -7,11 +17,11 @@
   <div class="col-12 tm-page-cols-container">
     <div class="tm-page-col-left tm-welcome-box tm-bg-gradient">
       <p class="tm-welcome-text">
-        <em>"Somos feitos de histórias, ideias e encontros — um espaço onde o livro ganha voz e o leitor, asas."</em>
+        <em>"Promovendo o encontro entre o leitor e o infinito das palavras"</em>
       </p>
     </div>
     <div class="tm-page-col-right">
-      <div class="tm-welcome-parallax" data-parallax="scroll" data-image-src="img/livros2.jpg"></div>
+      <div class="tm-welcome-parallax" data-parallax="scroll" data-image-src="img/livro8.jpg"></div>
     </div>
   </div>
 </div>
