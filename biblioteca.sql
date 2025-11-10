@@ -61,6 +61,9 @@ CREATE TABLE Reservas (
     UNIQUE KEY (id_livro, id_usuario, status)
 );
 
+ALTER TABLE Livros ADD capa VARCHAR(255) NULL;
+
+
 INSERT INTO Generos (nome_genero) VALUES
 ('Romance'),
 ('Ficção Científica'),
@@ -83,3 +86,7 @@ INSERT INTO Usuarios (nome, email, senha, tipo_usuario) VALUES
 
 INSERT INTO Emprestimos (id_livro, id_usuario, data_emprestimo, data_prevista_devolucao) VALUES
 (2, 1, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 15 DAY));
+
+UPDATE Livros SET capa = 'img/capas/evelyn.jpg' WHERE id_livro = 1;
+UPDATE Livros SET capa = 'img/capas/daisy.jpg' WHERE id_livro = 2;
+UPDATE Livros SET capa = 'img/capas/acaba.jpg' WHERE id_livro = 3;

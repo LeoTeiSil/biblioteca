@@ -1,5 +1,118 @@
+/* Botão principal de envio */
 .tm-btn-submit {
-    padding: 2px 4px; /* diminui o tamanho interno do botão */
-    font-size: 0.4rem; /* diminui a fonte */
-    border-radius: 4px; /* opcional: deixa os cantos um pouco menores */
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border-radius: 5px;
+  transition: 0.2s ease-in-out;
+}
+
+/* Container dos botões dentro dos cards */
+.botoes-livro {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 10px;
+  padding: 8px 0;
+  gap: 5px;
+}
+
+/* Estilo geral dos botões */
+.botoes-livro button {
+  flex: 1;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 0;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* Efeito ao passar o mouse */
+.botoes-livro button:hover {
+  transform: scale(1.05);
+  opacity: 0.9;
+}
+
+/* Cores específicas dos botões */
+.btn-emprestar {
+  background-color: #3b82f6; /* Azul */
+}
+
+.btn-lido {
+  background-color: #16a34a; /* Verde */
+}
+
+.btn-desejado {
+  background-color: #facc15; /* Amarelo */
+  color: #000;
+}
+
+/* Ajuste visual dos cards */
+.card {
+  border: none;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.2s ease-in-out;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
+/* Imagem dos livros: tamanho igual e bem cortada */
+.card-img-top {
+  height: 250px; /* altura padronizada */
+  width: 100%;
+  object-fit: cover; /* corta e ajusta sem distorcer */
+  border-radius: 8px 8px 0 0;
+}
+
+/* Estilo dos botões do Bootstrap */
+.btn {
+  font-size: 0.8rem;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: 0.2s;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  border: none;
+}
+
+.btn-success {
+  background-color: #22c55e;
+  border: none;
+}
+
+.btn-warning {
+  background-color: #facc15;
+  border: none;
+  color: #333;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  transform: scale(1.03);
+}
+
+/* Ajuste da imagem e alinhamento geral */
+.card-body {
+  text-align: left;
+  padding: 15px;
+}
+
+/* Mantém o tamanho dos títulos e informações */
+.card-body h5 {
+  font-size: 1rem;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.card-body p {
+  font-size: 0.9rem;
+  margin-bottom: 5px;
 }

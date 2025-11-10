@@ -1,272 +1,138 @@
 <?php
 session_start();
+include 'conexao.php';
 
-// se o usuário não estiver logado, redireciona para login
+// Se o usuário não estiver logado, redireciona
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
-    header('Location: login.php');
-    exit;
+  header('Location: login.php');
+  exit;
 }
+
+$idUsuario = $_SESSION['id_usuario'] ?? null;
+
+// Captura filtros e pesquisa
+$pesquisa = isset($_GET['pesquisa']) ? mysqli_real_escape_string($conexao, $_GET['pesquisa']) : '';
+$filtro_genero = isset($_GET['genero']) ? (int) $_GET['genero'] : 0;
+$filtro_autor = isset($_GET['autor']) ? (int) $_GET['autor'] : 0;
+
+// Consulta base
+$sql = "
+    SELECT 
+        L.id_livro,
+        L.titulo,
+        L.ano_publicacao,
+        L.quantidade_disponivel,
+        L.capa,
+        A.nome_autor,
+        G.nome_genero
+    FROM Livros L
+    LEFT JOIN Autores A ON L.id_autor = A.id_autor
+    LEFT JOIN Generos G ON L.id_genero = G.id_genero
+    WHERE 1=1
+";
+
+// Adiciona filtros dinamicamente
+if ($pesquisa !== '') {
+  $sql .= " AND L.titulo LIKE '%$pesquisa%'";
+}
+if ($filtro_genero > 0) {
+  $sql .= " AND L.id_genero = $filtro_genero";
+}
+if ($filtro_autor > 0) {
+  $sql .= " AND L.id_autor = $filtro_autor";
+}
+
+$resultado = mysqli_query($conexao, $sql);
+
+// Busca dados para filtros
+$generos = mysqli_query($conexao, "SELECT * FROM Generos ORDER BY nome_genero");
+$autores = mysqli_query($conexao, "SELECT * FROM Autores ORDER BY nome_autor");
 ?>
 
-<?php
-  include 'cabecalho.php'
-?>
+<?php include 'cabecalho_painel.php'; ?>
 
-      <div class="row tm-welcome-row">
-        <div class="col-12 tm-page-cols-container">
-         <div class="tm-page-col-left tm-welcome-box" 
-            style="background-color: #669999;">
-          <p class="tm-welcome-text">
-            <em>Usuário , seja bem-vindo a sua nova biblioteca virtual !</em>
-          </p>
-        </div>
+<!-- Link para o CSS personalizado (verifique se o caminho está correto) -->
+<link rel="stylesheet" href="css/config.css">
 
-          <div class="tm-page-col-right">
-            <div
-              class="tm-welcome-parallax"
-              data-parallax="scroll"
-              data-image-src="img/livros9.jpg"
-            ></div>
-          </div>
-        </div>
-      </div>
+<div class="container mt-5">
+  <h2 class="text-center mb-4">📚 Biblioteca Blook</h2>
+  <p class="text-center">
+    <em><?php echo htmlspecialchars($_SESSION['nome']); ?>, seja bem-vindo(a) à sua nova biblioteca virtual!</em>
+  </p>
 
-      <section class="row tm-pt-4 tm-pb-6">
-        
-        <div class="col-12 tm-page-cols-container">
-          <div class="tm-page-col-left tm-tab-links">
-            <ul class="tabs clearfix" data-tabgroup="first-tab-group">
-              <li>
-                <a href="#romance" class="active">
-                  <div class="tm-tab-icon"></div>
-                  Romance
-                </a>
-              </li>
-              <li>
-                <a href="#suspence" class="">
-                  <div class="tm-tab-icon"></div>
-                  Suspence
-                </a>
-              </li>
-              <li>
-                <a href="#terror" class="">
-                  <div class="tm-tab-icon"></div>
-                  Terror
-                </a>
-              </li>
-            </ul>
-          </div>
-          <div class="tm-page-col-right">
-            <h2 class="tm-text-secondary tm-mb-5">
-              Organize sua leitura do seu jeito!
-            </h2>
-            <p class="tm-mb-6">
-             No nosso acervo virtual, você tem a liberdade de organizar e acompanhar sua jornada literária de forma simples e personalizada. É possível classificar cada obra como Empréstimo, Lido ou Desejado, mantendo um controle completo sobre os livros que já passaram por suas mãos, aqueles que ainda quer explorar e os que estão em andamento. 
-             <br>
-             <br>
-             Essa funcionalidade facilita o acompanhamento das suas leituras, ajuda a planejar futuras descobertas e torna sua experiência de leitura mais envolvente, prática e prazerosa.
+  <!-- Barra de pesquisa e filtros -->
+  <form method="GET" class="mb-4 d-flex flex-wrap justify-content-center gap-3">
+    <input type="text" name="pesquisa" class="form-control w-50" placeholder="Pesquisar livro por título..."
+      value="<?php echo htmlspecialchars($pesquisa); ?>">
 
-              
-            </p>
+    <select name="genero" class="form-select w-auto">
+      <option value="0">Todos os Gêneros</option>
+      <?php while ($g = mysqli_fetch_assoc($generos)): ?>
+        <option value="<?php echo $g['id_genero']; ?>" <?php if ($filtro_genero == $g['id_genero']) echo 'selected'; ?>>
+          <?php echo htmlspecialchars($g['nome_genero']); ?>
+        </option>
+      <?php endwhile; ?>
+    </select>
+
+    <select name="autor" class="form-select w-auto">
+      <option value="0">Todos os Autores</option>
+      <?php while ($a = mysqli_fetch_assoc($autores)): ?>
+        <option value="<?php echo $a['id_autor']; ?>" <?php if ($filtro_autor == $a['id_autor']) echo 'selected'; ?>>
+          <?php echo htmlspecialchars($a['nome_autor']); ?>
+        </option>
+      <?php endwhile; ?>
+    </select>
+
+    <button type="submit" class="btn btn-secondary">Filtrar</button>
+  </form>
+
+  <!-- Lista de livros -->
+  <div class="row">
+    <?php if (mysqli_num_rows($resultado) > 0): ?>
+      <?php while ($livro = mysqli_fetch_assoc($resultado)): ?>
+        <div class="col-md-4 mb-4">
+          <div class="card h-100 shadow-sm">
             
+            <!-- Exibe a imagem da capa (mesmo tamanho graças a .card-img-top) -->
+            <?php if (!empty($livro['capa'])): ?>
+              <img src="<?php echo htmlspecialchars($livro['capa']); ?>" class="card-img-top" alt="Capa do livro">
+            <?php else: ?>
+              <img src="imagens/capa_padrao.jpg" class="card-img-top" alt="Capa padrão">
+            <?php endif; ?>
+
+            <div class="card-body">
+              <h5 class="card-title text-center"><?php echo htmlspecialchars($livro['titulo']); ?></h5>
+              <p class="card-text"><strong>Autor:</strong> <?php echo htmlspecialchars($livro['nome_autor'] ?? 'Desconhecido'); ?></p>
+              <p class="card-text"><strong>Gênero:</strong> <?php echo htmlspecialchars($livro['nome_genero'] ?? 'Não informado'); ?></p>
+              <p class="card-text"><strong>Ano:</strong> <?php echo htmlspecialchars($livro['ano_publicacao']); ?></p>
+              <p class="card-text"><strong>Disponíveis:</strong> <?php echo htmlspecialchars($livro['quantidade_disponivel']); ?></p>
+
+              <!-- BOTÕES: usando as classes do seu CSS -->
+              <div class="botoes-livro">
+                <form method="POST" action="dashboard.php" style="flex:1;">
+                  <input type="hidden" name="id_livro" value="<?php echo $livro['id_livro']; ?>">
+                  <button type="submit" name="acao" value="emprestar" class="btn-emprestar">Emprestar</button>
+                </form>
+
+                <form method="POST" action="dashboard.php" style="flex:1;">
+                  <input type="hidden" name="id_livro" value="<?php echo $livro['id_livro']; ?>">
+                  <button type="submit" name="acao" value="lido" class="btn-lido">Lido</button>
+                </form>
+
+                <form method="POST" action="dashboard.php" style="flex:1;">
+                  <input type="hidden" name="id_livro" value="<?php echo $livro['id_livro']; ?>">
+                  <button type="submit" name="acao" value="desejado" class="btn-desejado">Desejado</button>
+                </form>
+              </div>
+            </div>
           </div>
-          
         </div>
-        
-      </section>
+      <?php endwhile; ?>
+    <?php else: ?>
+      <p class="text-center mt-4">Nenhum livro encontrado com os filtros selecionados.</p>
+    <?php endif; ?>
+  </div>
+</div>
 
-      <div class="tm-page-col-right">
-        <div class="row tm-pt-7 tm-pb-6">
-          
-<!-- ROMANCE -->
-          <div class="col-md-6 tm-home-section-2-left">
-            
-            <div
-              class="img-fluid tm-mb-4 tm-small-parallax"
-              data-parallax="scroll"
-              data-image-src="img/carriesoto.jpg"
-              id="romance"
-              ></div>
-            <div >
-              <h3 class="tm-text-secondary tm-mb-4">
-                Carrie Soto está de volta
-
-              </h3>
-              <p class="tm-mb-5">
-               Carrie Soto Está de Volta conta a história da tenista Carrie, que retorna às quadras, enfrenta adversários e desafios, e luta para provar que ainda é a melhor do mundo.
-
-           
-              </p>
-                <div class="text-center">
-                  <button
-                    type="button"
-                    class="btn btn-secondary tm-btn-submit">
-                    Pegos
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-secondary tm-btn-submit">
-                    Lidos
-                  </button>
-                 <button type="button" class="btn btn-secondary tm-btn-submit">
-                    <img src="img/presente.png">
-                
-                </button>
-                </div>
-                <br>
-                <br>
-            </div>
-          </div>
-          
-          <div class="col-md-6 tm-home-section-2-left">
-            <div
-              class="img-fluid tm-mb-4 tm-small-parallax"
-              data-parallax="scroll"
-              data-image-src="img/assimqueacaba.jpg"></div>
-            <div>
-              <h3 class="tm-text-secondary tm-mb-4">
-                É Assim Que Acaba
-              </h3>
-              <p class="tm-mb-5">
-                É Assim Que Acaba conta a história de Lily, que se apaixona por Ryle, enfrenta violência e precisa tomar decisões difíceis para proteger a si mesma e quem ama.           
-              </p>
-              
-            <div class="text-center">
-                  <button
-                    type="button"
-                    class="btn btn-secondary tm-btn-submit">
-                    Pegos
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-secondary tm-btn-submit">
-                    Lidos
-                  </button>
-                 <button type="button" class="btn btn-secondary tm-btn-submit">
-                    <img src="img/presente.png">
-                
-                </button>
-                </div>
-                <br>
-
-            </div>
-          </div>
-          <!-- SUSPENCE -->
-
-          <div class="col-md-6 tm-home-section-2-left">
-            <div
-              class="img-fluid tm-mb-4 tm-small-parallax"
-              data-parallax="scroll"
-              data-image-src="img/paciente.jpg"></div>
-            <div>
-              <h3 class="tm-text-secondary tm-mb-4">
-                A Paciente Silenciosa
-              </h3>
-              <p class="tm-mb-5">
-                A Paciente Silenciosa acompanha Alicia, uma pintora que, após atirar no marido, para de falar, e Theo, o terapeuta que tenta descobrir o motivo por trás de seu silêncio.        
-              </p>
-              
-            <div class="text-center">
-                  <button
-                    type="button"
-                    class="btn btn-secondary tm-btn-submit">
-                    Pegos
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-secondary tm-btn-submit">
-                    Lidos
-                  </button>
-                 <button type="button" class="btn btn-secondary tm-btn-submit">
-                    <img src="img/presente.png">
-                
-                </button>
-                </div>
-                <br>
-
-            </div>
-          </div>
-
-          <div class="col-md-6 tm-home-section-2-right">
-            <div
-              class="img-fluid tm-mb-4 tm-small-parallax"
-              data-parallax="scroll"
-              data-image-src="img/mentirosos.jpg"
-              id="suspence"
-              ></div>
-            <div>
-              <h3 class="tm-text-secondary tm-mb-4">
-                Mentirosos
-              </h3>
-              <p class="tm-section-2-text">
-              Mentirosos conta a história de Cadence, que após um acidente, precisa descobrir os segredos e mentiras da sua família em um verão cheio de revelações.
-              </p>
-              <br>
-            </div>
-              <div class="text-center">
-                  <button
-                    type="button"
-                    class="btn btn-secondary tm-btn-submit">
-                    Pegos
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-secondary tm-btn-submit">
-                    Lidos
-                  </button>
-                 <button type="button" class="btn btn-secondary tm-btn-submit">
-                    <img src="img/presente.png">
-                
-                </button>
-                </div>
-                <br>
-                <br>
-<!-- TERROR -->
-            </div>
-            <div class="col-md-6 tm-home-section-2-left">
-            <div
-              class="img-fluid tm-mb-4 tm-small-parallax"
-              data-parallax="scroll"
-              data-image-src="img/it.jpg"
-              id="terror"></div>
-            <div>
-              <h3 class="tm-text-secondary tm-mb-4">
-                It: A Coisa
-              </h3>
-              <p class="tm-mb-5">
-                It: A Coisa acompanha um grupo de amigos que enfrenta seus maiores medos ao encarar Pennywise, um palhaço assustador que aterroriza a cidade de Derry.       
-              </p>
-              
-            <div class="text-center">
-                  <button
-                    type="button"
-                    class="btn btn-secondary tm-btn-submit">
-                    Pegos
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-secondary tm-btn-submit">
-                    Lidos
-                  </button>
-                 <button type="button" class="btn btn-secondary tm-btn-submit">
-                    <img src="img/presente.png">
-                
-                </button>
-                </div>
-                <br>
-
-            </div>
-          </div>
-          </div>
-
-        </div>
-
-        
-      </div>
-      <!-- row -->
-
-
-      
-<?php
-  include 'footer.php'
-?>
+<?php include 'footer.php'; ?>
+<?php mysqli_close($conexao); ?>
